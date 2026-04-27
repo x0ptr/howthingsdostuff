@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HowThingsDoStuff(TM)</title>
+  <meta name="description" content="HowThingsDoStuff(TM) video feed.">
+  <style>
+    :root {
+      --bg: #070910;
+      --bg-soft: #0e1220;
+      --card: #11182b;
+      --text: #e6ebff;
+      --muted: #9ba8d9;
+      --line: #1b2440;
+      --brand: #7aa2ff;
+      --brand-2: #87f5d7;
+      --radius: 18px;
+      --shadow: 0 14px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(1200px 500px at 10% -10%, rgba(122, 162, 255, 0.18), transparent 60%),
+        radial-gradient(900px 400px at 100% 0%, rgba(135, 245, 215, 0.12), transparent 55%),
+        var(--bg);
+      line-height: 1.5;
+    }
+
+    .wrap {
+      width: min(1120px, calc(100% - 2rem));
+      margin: 0 auto;
+    }
+
+    header { padding: 4.2rem 0 1.8rem; }
+
+    h1 {
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      line-height: 1.1;
+      margin: 0;
+      letter-spacing: -0.03em;
+    }
+
+    main { padding-bottom: 3.3rem; }
+
+    .videos {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      width: min(860px, 100%);
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent 30%), var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .video-shell {
+      position: relative;
+      aspect-ratio: 16 / 9;
+      background: #0b0f1c;
+      overflow: hidden;
+    }
+
+    .video-thumb {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: saturate(1.06) contrast(1.03);
+      transform: scale(1.01);
+    }
+
+    .play {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      border: 0;
+      cursor: pointer;
+      background:
+        radial-gradient(circle at center, rgba(0, 0, 0, 0.16), rgba(0, 0, 0, 0.54)),
+        transparent;
+      color: white;
+      transition: background 180ms ease;
+    }
+
+    .play:hover { background: radial-gradient(circle at center, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.44)); }
+
+    .play-icon {
+      width: 68px;
+      height: 68px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.88);
+      color: #111;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+      font-size: 1.25rem;
+      padding-left: 0.12rem;
+    }
+
+    .card-body {
+      padding: 0.95rem 0.95rem 1rem;
+    }
+
+    .channel {
+      color: var(--brand-2);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      margin: 0.35rem 0 0.45rem;
+      font-size: 1.03rem;
+      line-height: 1.32;
+    }
+
+    .desc {
+      margin: 0;
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+
+    .link {
+      margin-top: 0.7rem;
+      display: inline-block;
+      color: var(--brand);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .link:hover { text-decoration: underline; }
+
+    footer {
+      border-top: 1px solid var(--line);
+      margin-top: 2rem;
+      padding: 1rem 0 2rem;
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    .github-link {
+      position: fixed;
+      top: 0.9rem;
+      right: 0.9rem;
+      padding: 0.45rem 0.7rem;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      color: var(--text);
+      background: rgba(17, 24, 43, 0.85);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      z-index: 20;
+      text-decoration: none;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      font-size: 0.88rem;
+    }
+
+    .github-link:hover {
+      color: var(--brand-2);
+      border-color: var(--brand);
+    }
+  </style>
+</head>
+<body>
+  <a
+    class="github-link"
+    href="https://github.com/x0ptr/howthingsdostuff"
+    target="_blank"
+    rel="noreferrer noopener"
+    aria-label="Open GitHub repository to propose videos"
+    title="Pull request new videos"
+  >
+    >> github
+  </a>
+  <div class="wrap">
+    <header>
+      <h1>HowThingsDoStuff(TM)</h1>
+    </header>
+
+    <main>
+      <section class="videos" id="video-grid" aria-label="Video list"></section>
+    </main>
+
+    <footer>
+      &copy; <span id="year"></span> howthingsdostuff.com
+    </footer>
+  </div>
+
+  <script>
+    const youtubeLinks = [
+      "https://youtu.be/wfr4QN1Hvhs?si=0xl87EYYAOE2okK5",
+      // "https://www.youtube.com/watch?v=hLWFJ91gKSo",
+      // "https://youtu.be/dX9CGRZwD-w"
+    ];
+
+    const grid = document.getElementById("video-grid");
+    const year = document.getElementById("year");
+    year.textContent = String(new Date().getFullYear());
+
+    const getVideoId = (url) => {
+      try {
+        const parsed = new URL(url);
+        if (parsed.hostname.includes("youtu.be")) {
+          return parsed.pathname.replace("/", "");
+        }
+        if (parsed.hostname.includes("youtube.com")) {
+          return parsed.searchParams.get("v");
+        }
+      } catch (_err) {
+        return null;
+      }
+      return null;
+    };
+
+    const createCard = (youtubeLink) => {
+      const videoId = getVideoId(youtubeLink);
+      if (!videoId) return null;
+
+      const card = document.createElement("article");
+      card.className = "card";
+
+      const shell = document.createElement("div");
+      shell.className = "video-shell";
+
+      const thumb = document.createElement("img");
+      thumb.className = "video-thumb";
+      thumb.loading = "lazy";
+      thumb.alt = "";
+      thumb.src = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+
+      const play = document.createElement("button");
+      play.className = "play";
+      play.type = "button";
+      play.setAttribute("aria-label", "Play video");
+      play.innerHTML = '<span class="play-icon">▶</span>';
+
+      play.addEventListener("click", () => {
+        const iframe = document.createElement("iframe");
+        iframe.title = "YouTube video";
+        iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+        iframe.allowFullscreen = true;
+        iframe.loading = "lazy";
+        iframe.referrerPolicy = "strict-origin-when-cross-origin";
+        iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0`;
+        shell.replaceChildren(iframe);
+      });
+
+      shell.append(thumb, play);
+
+      const body = document.createElement("div");
+      body.className = "card-body";
+
+      const openLink = document.createElement("a");
+      openLink.className = "link";
+      openLink.href = youtubeLink;
+      openLink.target = "_blank";
+      openLink.rel = "noreferrer noopener";
+      openLink.textContent = "Open on YouTube";
+
+      body.append(openLink);
+      card.append(shell, body);
+      return card;
+    };
+
+    youtubeLinks.forEach((youtubeLink) => {
+      const card = createCard(youtubeLink);
+      if (card) grid.append(card);
+    });
+  </script>
+</body>
+</html>
