@@ -1,21 +1,33 @@
 # howthingsdostuff
 
-One-page GitHub Pages site for **HowThingsDoStuff(TM)**, featuring a vertical YouTube video feed.
+One-page GitHub Pages site for **HowThingsDoStuff(TM)**, featuring a searchable YouTube video feed.
 
 ## Files
 
-- `index.html` — complete one-page dark-mode site
+- `index.html` — complete one-page site (search + embeds + styles)
 - `CNAME` — custom domain for GitHub Pages (`howthingsdostuff.com`)
+- `scripts/add-video.mjs` — CLI script to fetch title/channel and insert video into `videoCatalog`
 
 ## Add videos
 
-Open `index.html` and edit the `youtubeLinks` array near the bottom:
+Use the script with a YouTube URL (defaults to top of the feed):
 
-```js
-const youtubeLinks = [
-  "https://www.youtube.com/watch?v=VIDEO_ID",
-  "https://youtu.be/VIDEO_ID"
-];
+```bash
+node scripts/add-video.mjs "https://youtu.be/VIDEO_ID"
 ```
 
-The list is generated with JavaScript from those links. Each card uses YouTube's privacy-enhanced embed domain (`youtube-nocookie.com`) and loads the iframe only when clicked.
+To insert at the bottom instead:
+
+```bash
+node scripts/add-video.mjs "https://youtu.be/VIDEO_ID" --position bottom
+```
+
+The script fetches metadata from YouTube oEmbed and inserts a `{ link, title, channel }` entry into `videoCatalog` in `index.html` at `top` or `bottom`.
+
+## Search
+
+The top navigation includes a live search box. It filters by:
+
+- video title
+- channel
+- full link
