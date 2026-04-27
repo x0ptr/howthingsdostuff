@@ -233,6 +233,41 @@
       return null;
     };
 
+    const metaCache = new Map();
+
+    const getVideoMeta = async (youtubeLink) => {
+      if (metaCache.has(youtubeLink)) {
+        return metaCache.get(youtubeLink);
+      }
+
+      const oEmbedUrl = new URL("https://www.youtube.com/oembed");
+      oEmbedUrl.searchParams.set("url", youtubeLink);
+      oEmbedUrl.searchParams.set("format", "json");
+
+      const request = (async () => {
+        try {
+          const response = await fetch(oEmbedUrl.toString());
+          if (!response.ok) {
+            throw new Error(`oEmbed returned ${response.status}`);
+          }
+          const data = await response.json();
+          return {
+            title: data.title || "YouTube video",
+            channel: data.author_name || "YouTube",
+          };
+        } catch (err) {
+          console.warn("Failed to load video metadata", err);
+          return {
+            title: "YouTube video",
+            channel: "YouTube",
+          };
+        }
+      })();
+
+      metaCache.set(youtubeLink, request);
+      return request;
+    };
+
     const createCard = (youtubeLink) => {
       const videoId = getVideoId(youtubeLink);
       if (!videoId) return null;
@@ -255,21 +290,17 @@
       play.setAttribute("aria-label", "Play video");
       play.innerHTML = '<span class="play-icon">▶</span>';
 
-      play.addEventListener("click", () => {
-        const iframe = document.createElement("iframe");
-        iframe.title = "YouTube video";
-        iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
-        iframe.allowFullscreen = true;
-        iframe.loading = "lazy";
-        iframe.referrerPolicy = "strict-origin-when-cross-origin";
-        iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0`;
-        shell.replaceChildren(iframe);
-      });
-
       shell.append(thumb, play);
 
       const body = document.createElement("div");
       body.className = "card-body";
+
+      const channel = document.createElement("div");
+      channel.className = "channel";
+      channel.textContent = "YouTube";
+
+      const title = document.createElement("h2");
+      title.textContent = "Loading title...";
 
       const openLink = document.createElement("a");
       openLink.className = "link";
@@ -278,15 +309,66 @@
       openLink.rel = "noreferrer noopener";
       openLink.textContent = "Open on YouTube";
 
-      body.append(openLink);
+      body.append(channel, title, openLink);
       card.append(shell, body);
-      return card;
+
+      play.addEventListener("click", () => {
+        const iframe = document.createElement("iframe");
+        iframe.title = title.textContent || "YouTube video";
+        iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+        iframe.allowFullscreen = true;
+        iframe.loading = "lazy";
+        iframe.referrerPolicy = "strict-origin-when-cross-origin";
+        iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0`;
+        shell.replaceChildren(iframe);
+      });
+
+      const loadMeta = async () => {
+        if (card.dataset.metaLoaded === "true") return;
+        card.dataset.metaLoaded = "true";
+        const meta = await getVideoMeta(youtubeLink);
+        channel.textContent = meta.channel;
+        title.textContent = meta.title;
+      };
+
+      return { card, loadMeta };
     };
 
-    youtubeLinks.forEach((youtubeLink) => {
-      const card = createCard(youtubeLink);
-      if (card) grid.append(card);
+    const cardEntries = youtubeLinks
+      .map((youtubeLink) => createCard(youtubeLink))
+      .filter((entry) => entry);
+
+    cardEntries.forEach(({ card }) => {
+      grid.append(card);
     });
+
+    if ("IntersectionObserver" in window) {
+      const loadMetaByCard = new WeakMap();
+      cardEntries.forEach(({ card, loadMeta }) => {
+        loadMetaByCard.set(card, loadMeta);
+      });
+
+      const observer = new IntersectionObserver((entries, obs) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const loadMeta = loadMetaByCard.get(entry.target);
+          if (loadMeta) loadMeta();
+          obs.unobserve(entry.target);
+        });
+      }, {
+        root: null,
+        rootMargin: "280px 0px",
+        threshold: 0.01,
+      });
+
+      cardEntries.forEach(({ card }) => {
+        observer.observe(card);
+      });
+    } else {
+      cardEntries.forEach(({ loadMeta }) => {
+        loadMeta();
+      });
+    }
   </script>
 </body>
 </html>
